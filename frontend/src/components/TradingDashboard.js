@@ -16,7 +16,17 @@ import {
   Settings,
   Play,
   Pause,
-  RefreshCw
+  RefreshCw,
+  Cpu,
+  AlertCircle,
+  CheckCircle,
+  TrendingUp as TrendUp,
+  TrendingDown as TrendDown,
+  Gauge,
+  Layers,
+  Network,
+  Bot,
+  PieChart
 } from 'lucide-react';
 import axios from 'axios';
 
