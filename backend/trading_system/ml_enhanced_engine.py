@@ -157,7 +157,28 @@ class MLEnhancedTradingEngine:
     
     async def _initialize_ml_models(self):
         """Initialize and train ML models for predictions"""
-        logger.info("Initializing ML models...")
+        logger.info("Initializing Advanced ML models...")
+        
+        try:
+            # Initialize advanced ML models using the new engine
+            symbols = self.config.trading_pairs
+            success = await self.advanced_ml_engine.initialize_advanced_models(symbols)
+            
+            if success:
+                logger.info(f"Advanced ML models initialized successfully for {len(symbols)} symbols")
+            else:
+                logger.warning("Failed to initialize advanced ML models, falling back to legacy models")
+                # Fallback to legacy ML initialization if needed
+                await self._initialize_legacy_ml_models()
+            
+        except Exception as e:
+            logger.error(f"Error initializing advanced ML models: {e}")
+            # Fallback to legacy ML initialization
+            await self._initialize_legacy_ml_models()
+    
+    async def _initialize_legacy_ml_models(self):
+        """Legacy ML model initialization (fallback)"""
+        logger.info("Initializing legacy ML models...")
         
         try:
             for symbol in self.config.trading_pairs:
@@ -181,16 +202,16 @@ class MLEnhancedTradingEngine:
                         self.ml_models[symbol] = model
                         self.feature_scalers[symbol] = scaler
                         
-                        logger.info(f"ML model trained for {symbol}")
+                        logger.info(f"Legacy ML model trained for {symbol}")
                     else:
                         logger.warning(f"Insufficient data to train ML model for {symbol}")
                 else:
                     logger.warning(f"No historical data available for {symbol}")
             
-            logger.info(f"ML models initialized for {len(self.ml_models)} symbols")
+            logger.info(f"Legacy ML models initialized for {len(self.ml_models)} symbols")
             
         except Exception as e:
-            logger.error(f"Error initializing ML models: {e}")
+            logger.error(f"Error initializing legacy ML models: {e}")
     
     def _prepare_ml_features(self, data: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray]:
         """Prepare features and targets for ML training"""
