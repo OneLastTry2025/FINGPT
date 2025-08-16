@@ -1,6 +1,6 @@
 """
 Real-time Data Feeds Manager for FinGPT Trading System
-Handles multiple data sources: MEXC, Binance, Yahoo Finance
+Handles multiple data sources: MEXC (Primary), Binance, Yahoo Finance
 """
 
 import asyncio
