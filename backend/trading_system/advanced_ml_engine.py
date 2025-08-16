@@ -36,8 +36,13 @@ from textblob import TextBlob
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification
 
-# Technical Analysis
-import talib
+# Technical Analysis (fallback implementation)
+try:
+    import talib
+    TALIB_AVAILABLE = True
+except ImportError:
+    TALIB_AVAILABLE = False
+    # Logger will be defined below, so we'll log the warning later
 
 logger = logging.getLogger(__name__)
 
