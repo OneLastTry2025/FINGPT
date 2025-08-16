@@ -654,13 +654,18 @@ const TradingDashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center space-x-2">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    {mlActivity?.system_status === 'active' ? (
+                      <CheckCircle className="h-5 w-5 text-green-500" />
+                    ) : (
+                      <AlertCircle className="h-5 w-5 text-orange-500" />
+                    )}
                     <span className="text-sm font-medium">
-                      {mlActivity?.system_status === 'active' ? 'Active' : 'Inactive'}
+                      {mlActivity?.system_status === 'active' ? 'Active' : 
+                       mlStatus?.total_ml_capacity?.ensemble_models > 0 ? 'Loaded' : 'Inactive'}
                     </span>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {mlActivity?.total_active_models || 0} models running
+                    {mlStatus ? `${mlStatus.total_ml_capacity.ensemble_models + mlStatus.total_ml_capacity.rl_agents} models total` : '0 models running'}
                   </p>
                 </CardContent>
               </Card>
