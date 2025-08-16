@@ -62,7 +62,14 @@ class MLEnhancedTradingEngine:
         self.portfolio_value = 100000.0  # Starting with $100k paper money
         self.daily_pnl = 0.0
         
-        # ML models (will be loaded/trained)
+        # Initialize Advanced ML Engine
+        hardware_config = {
+            'parallel_analysis_workers': 8,  # Use reasonable number of workers
+            'memory_limit_gb': 16
+        }
+        self.advanced_ml_engine = AdvancedMLEngine(hardware_config)
+        
+        # Legacy ML models (for backward compatibility)
         self.ml_models = {}
         self.feature_scalers = {}
         
