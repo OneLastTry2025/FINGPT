@@ -748,8 +748,11 @@ class MLEnhancedTradingEngine:
         """Get current engine status"""
         total_unrealized_pnl = sum(pos.unrealized_pnl for pos in self.positions.values())
         
-        # Get advanced ML engine status
-        advanced_ml_status = await self.advanced_ml_engine.get_model_status()
+        # Get advanced ML engine status (disabled for testing)
+        if self.advanced_ml_engine:
+            advanced_ml_status = await self.advanced_ml_engine.get_model_status()
+        else:
+            advanced_ml_status = {"status": "disabled", "models_loaded": 0}
         
         return {
             "is_running": self.is_running,
