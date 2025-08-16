@@ -198,9 +198,10 @@ async def startup_event():
         set_trading_engine(trading_engine_instance)
         
         # Start enhanced trading engine with full ML/RL capabilities
+        # Note: ML models will be loaded on-demand to prevent API blocking
         await trading_engine_instance.start_enhanced_engine(
             symbols=['BTCUSDT', 'ETHUSDT', 'BNBUSDT'],
-            enable_ml=True
+            enable_ml=False  # Changed to False to prevent startup blocking
         )
         
         logger.info("FinGPT Trading System initialized successfully!")
