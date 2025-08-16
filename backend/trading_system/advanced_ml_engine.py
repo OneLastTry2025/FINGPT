@@ -46,6 +46,10 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
+# Log TA-Lib availability warning if needed
+if not TALIB_AVAILABLE:
+    logger.warning("TA-Lib not available, using manual technical indicators")
+
 class TradingEnvironment(gym.Env):
     """Custom Gym environment for RL trading"""
     
