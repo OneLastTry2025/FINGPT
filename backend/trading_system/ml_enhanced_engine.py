@@ -62,12 +62,13 @@ class MLEnhancedTradingEngine:
         self.portfolio_value = 100000.0  # Starting with $100k paper money
         self.daily_pnl = 0.0
         
-        # Initialize Advanced ML Engine - Optimized for high-performance hardware
-        hardware_config = {
-            'parallel_analysis_workers': 24,  # Use half the available cores for ML
-            'memory_limit_gb': 100  # Allocate more memory for better performance
-        }
-        self.advanced_ml_engine = AdvancedMLEngine(hardware_config)
+        # Initialize Advanced ML Engine - Temporarily disabled for testing
+        # hardware_config = {
+        #     'parallel_analysis_workers': 24,  # Use half the available cores for ML
+        #     'memory_limit_gb': 100  # Allocate more memory for better performance
+        # }
+        # self.advanced_ml_engine = AdvancedMLEngine(hardware_config)
+        self.advanced_ml_engine = None  # Disabled for testing
         
         # Legacy ML models (for backward compatibility)
         self.ml_models = {}
