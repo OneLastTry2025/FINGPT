@@ -550,6 +550,39 @@ class FinGPTTester:
         except Exception as e:
             self.log_result("Crypto Price Accuracy", False, f"Connection error: {str(e)}")
     
+    def test_advanced_features(self):
+        """Test advanced features like MongoDB integration and risk management"""
+        try:
+            # Test risk configuration
+            response = requests.get(f"{API_BASE}/trading/config/risk", timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                if "risk_settings" in data:
+                    risk_settings = data["risk_settings"]
+                    self.log_result(
+                        "Risk Management", 
+                        True, 
+                        f"Risk management configuration retrieved", 
+                        data
+                    )
+                else:
+                    self.log_result(
+                        "Risk Management", 
+                        False, 
+                        f"Missing risk_settings: {data}"
+                    )
+            else:
+                self.log_result(
+                    "Risk Management", 
+                    False, 
+                    f"HTTP {response.status_code}: {response.text}"
+                )
+                
+        except Exception as e:
+            self.log_result("Risk Management", False, f"Connection error: {str(e)}")
+    
         """Test advanced features like MongoDB integration and risk management"""
         try:
             # Test risk configuration
