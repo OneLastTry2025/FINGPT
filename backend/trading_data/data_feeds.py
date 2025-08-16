@@ -81,7 +81,89 @@ class DataFeedManager:
                 except Exception as e:
                     logger.error(f"Error in subscriber callback: {e}")
     
-    async def _yahoo_finance_feed(self):
+    async def _mexc_websocket_feed(self):
+        """MEXC WebSocket feed for real-time crypto data (Primary Source)"""
+        mexc_symbols = ["BTC_USDT", "ETH_USDT", "BNB_USDT", "ADA_USDT", "DOT_USDT", "LINK_USDT"]
+        uri = "wss://contract.mexc.com/edge"
+        
+        while self.is_running:
+            try:
+                async with websockets.connect(uri) as websocket:
+                    logger.info("Connected to MEXC WebSocket")
+                    
+                    # Subscribe to all trading pairs
+                    for symbol in mexc_symbols:
+                        subscribe_msg = {
+                            "method": "sub.ticker",
+                            "param": {"symbol": symbol}
+                        }
+                        await websocket.send(json.dumps(subscribe_msg))
+                        logger.info(f"Subscribed to MEXC ticker: {symbol}")
+                    
+                    # Ping task to keep connection alive
+                    ping_task = asyncio.create_task(self._mexc_ping_handler(websocket))
+                    
+                    async for message in websocket:
+                        if not self.is_running:
+                            ping_task.cancel()
+                            break
+                        
+                        try:
+                            data = json.loads(message)
+                            
+                            # Handle ticker data
+                            if data.get("channel") == "push.ticker":
+                                await self._process_mexc_ticker(data)
+                            
+                            # Handle pong response
+                            elif data.get("channel") == "pong":
+                                logger.debug(f"MEXC pong received: {data.get('data')}")
+                                
+                        except json.JSONDecodeError:
+                            logger.error(f"Invalid JSON from MEXC: {message}")
+                        except Exception as e:
+                            logger.error(f"Error processing MEXC message: {e}")
+                            
+            except websockets.exceptions.ConnectionClosed:
+                logger.warning("MEXC WebSocket connection closed, reconnecting...")
+                await asyncio.sleep(5)
+            except Exception as e:
+                logger.error(f"Error in MEXC WebSocket: {e}")
+                await asyncio.sleep(10)
+    
+    async def _mexc_ping_handler(self, websocket):
+        """Send ping messages every 15 seconds to keep MEXC connection alive"""
+        try:
+            while self.is_running:
+                await asyncio.sleep(15)
+                ping_msg = {"method": "ping"}
+                await websocket.send(json.dumps(ping_msg))
+                logger.debug("Sent ping to MEXC")
+        except Exception as e:
+            logger.error(f"Ping handler error: {e}")
+    
+    async def _process_mexc_ticker(self, data):
+        """Process MEXC ticker data and notify subscribers"""
+        try:
+            ticker_data = data.get("data", {})
+            symbol = ticker_data.get("symbol", "")
+            
+            if symbol and ticker_data:
+                tick = MarketTick(
+                    symbol=symbol,
+                    price=float(ticker_data.get("lastPrice", 0)),
+                    volume=float(ticker_data.get("volume24", 0)),
+                    timestamp=datetime.now(),
+                    bid=float(ticker_data.get("bid1", 0)),
+                    ask=float(ticker_data.get("ask1", 0)),
+                    source="mexc"
+                )
+                await self._notify_subscribers(tick)
+                logger.debug(f"MEXC ticker processed: {symbol} @ ${tick.price}")
+                
+        except Exception as e:
+            logger.error(f"Error processing MEXC ticker: {e}")
+    
         """Yahoo Finance data feed for stocks and forex"""
         stocks = ["AAPL", "GOOGL", "MSFT", "TSLA", "AMZN", "NVDA", "META"]
         forex = ["EURUSD=X", "GBPUSD=X", "USDJPY=X"]
