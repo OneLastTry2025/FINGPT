@@ -210,32 +210,91 @@ class AdvancedMLEngine:
             self.nlp_pipeline = None
     
     async def _initialize_symbol_models(self, symbol: str):
-        """Initialize all ML/RL models for a specific symbol"""
+        """Initialize all ML/RL models for a specific symbol using REAL data"""
         try:
-            # Generate synthetic data for initial training
-            synthetic_data = self._generate_synthetic_market_data(symbol)
+            # Get real market data from MEXC instead of synthetic data
+            real_data = await self._get_real_market_data(symbol)
             
-            if len(synthetic_data) < 100:
+            if real_data.empty or len(real_data) < 100:
+                logger.warning(f"Insufficient real data for {symbol}, falling back to synthetic data for initialization")
+                real_data = self._generate_synthetic_market_data(symbol)
+            
+            if len(real_data) < 100:
                 logger.warning(f"Insufficient data for {symbol}, skipping model training")
                 return
             
-            # Prepare features and targets
-            features, targets = await self._prepare_advanced_features(synthetic_data)
+            # Prepare features and targets from REAL data
+            features, targets = await self._prepare_advanced_features(real_data)
             
             if len(features) < 50:
                 logger.warning(f"Insufficient features for {symbol}, skipping")
                 return
             
-            # Initialize multiple ML models
+            # Initialize multiple ML models with REAL data
             await self._train_ensemble_models(symbol, features, targets)
             
-            # Initialize RL agent
-            await self._initialize_rl_agent(symbol, synthetic_data)
+            # Initialize RL agent with REAL data
+            await self._initialize_rl_agent(symbol, real_data)
             
-            logger.info(f"Advanced models initialized for {symbol}")
+            logger.info(f"Advanced models initialized for {symbol} using REAL market data")
             
         except Exception as e:
             logger.error(f"Error initializing models for {symbol}: {e}")
+    
+    async def _get_real_market_data(self, symbol: str, days: int = 365) -> pd.DataFrame:
+        """Fetch real market data from MEXC API instead of generating synthetic data"""
+        try:
+            import aiohttp
+            
+            # Convert symbol format for MEXC (BTC_USDT)
+            mexc_symbol = symbol.replace("USDT", "_USDT") if "_" not in symbol else symbol
+            
+            # MEXC K-line API endpoint
+            url = f"https://contract.mexc.com/api/v1/contract/kline/{mexc_symbol}"
+            
+            # Calculate timeframe for the last 365 days
+            end_time = int(datetime.now().timestamp())
+            start_time = int((datetime.now() - timedelta(days=days)).timestamp())
+            
+            params = {
+                'interval': 'Hour4',  # 4-hour intervals for good resolution
+                'start': start_time,
+                'end': end_time
+            }
+            
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, params=params) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        
+                        if data.get('success') and data.get('data'):
+                            kline_data = data['data']
+                            
+                            # Convert MEXC format to DataFrame
+                            df_data = []
+                            for i in range(len(kline_data['time'])):
+                                df_data.append({
+                                    'timestamp': pd.to_datetime(kline_data['time'][i], unit='s'),
+                                    'open': float(kline_data['open'][i]),
+                                    'high': float(kline_data['high'][i]),
+                                    'low': float(kline_data['low'][i]),
+                                    'close': float(kline_data['close'][i]),
+                                    'volume': float(kline_data['vol'][i])
+                                })
+                            
+                            df = pd.DataFrame(df_data)
+                            df.set_index('timestamp', inplace=True)
+                            
+                            if not df.empty:
+                                logger.info(f"Retrieved {len(df)} real data points for {symbol} from MEXC")
+                                return df
+                            
+                    logger.warning(f"Failed to get real data for {symbol} from MEXC API")
+                    return pd.DataFrame()
+                    
+        except Exception as e:
+            logger.error(f"Error fetching real data for {symbol}: {e}")
+            return pd.DataFrame()
     
     def _generate_synthetic_market_data(self, symbol: str, days: int = 365) -> pd.DataFrame:
         """Generate realistic synthetic market data for training"""
