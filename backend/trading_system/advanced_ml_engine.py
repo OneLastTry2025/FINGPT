@@ -163,7 +163,7 @@ class AdvancedMLEngine:
         self.model_performance = {}
         self.training_history = {}
         
-        logger.info(f"Advanced ML Engine initialized with {self.cpu_cores} workers")
+        logger.info(f"Advanced ML Engine initialized with {self.cpu_cores} workers, {self.memory_limit_gb}GB memory, 48-core optimization")
     
     async def initialize_advanced_models(self, symbols: List[str]):
         """Initialize advanced ML/RL models for all symbols"""
