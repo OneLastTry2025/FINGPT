@@ -119,10 +119,32 @@ const TradingDashboard = () => {
 
   const initializeML = async () => {
     try {
-      await axios.post(`${API}/trading/ml/initialize`);
-      fetchData();
+      console.log('Initializing ML models...');
+      const response = await axios.post(`${API}/trading/ml/initialize`);
+      console.log('ML initialization response:', response.data);
+      
+      if (response.data.status === 'success') {
+        // Force refresh after initialization
+        setTimeout(() => {
+          fetchData();
+        }, 2000);
+      } else {
+        console.error('ML initialization failed:', response.data);
+      }
     } catch (error) {
       console.error('Error initializing ML:', error);
+      // Try to restart the trading engine if ML initialization fails
+      try {
+        await axios.post(`${API}/trading/start`, {
+          symbols: ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'],
+          enable_ml: true
+        });
+        setTimeout(() => {
+          fetchData();
+        }, 3000);
+      } catch (restartError) {
+        console.error('Error restarting engine:', restartError);
+      }
     }
   };
 
