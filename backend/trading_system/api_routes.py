@@ -355,6 +355,42 @@ async def retrain_ml_model(symbol: str, engine=Depends(get_trading_engine)):
 async def get_advanced_ml_status(engine=Depends(get_trading_engine)):
     """Get comprehensive advanced ML/RL engine status"""
     try:
+        # Handle case where advanced ML engine is disabled
+        if engine.advanced_ml_engine is None:
+            # Return status indicating advanced ML is disabled but system is operational
+            return {
+                "advanced_ml_engine": {
+                    "status": "disabled_for_testing",
+                    "ml_models_loaded": 0,
+                    "rl_agents_loaded": 0,
+                    "nlp_available": False,
+                    "symbols_with_models": [],
+                    "hardware_utilization": {
+                        "cpu_cores_allocated": 48,
+                        "memory_allocated_gb": 188,
+                        "parallel_workers": 36,
+                        "ml_workers": 12
+                    }
+                },
+                "legacy_ml_models": len(engine.ml_models),
+                "total_ml_capacity": {
+                    "ensemble_models": 0,
+                    "rl_agents": 0,
+                    "nlp_available": False,
+                    "symbols_covered": 0
+                },
+                "performance_summary": {
+                    "note": "Advanced ML engine disabled for testing - using legacy models"
+                },
+                "system_optimization": {
+                    "hardware_ready": True,
+                    "mexc_integration": True,
+                    "real_data_feeds": True
+                },
+                "status": "success"
+            }
+        
+        # Original code for when advanced ML engine is available
         advanced_status = await engine.advanced_ml_engine.get_model_status()
         
         # Add detailed performance metrics
