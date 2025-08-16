@@ -44,14 +44,17 @@ class DataFeedManager:
         self.is_running = True
         logger.info("Starting FinGPT Data Feed Manager...")
         
+        # Start MEXC WebSocket as primary crypto data source
+        asyncio.create_task(self._mexc_websocket_feed())
+        
         # Start Yahoo Finance data feed for stocks/forex
         asyncio.create_task(self._yahoo_finance_feed())
         
-        # Start cryptocurrency feeds if API keys available
+        # Start cryptocurrency feeds if API keys available (fallback)
         if self.config.is_api_configured("binance"):
             asyncio.create_task(self._binance_websocket_feed())
         
-        logger.info("All data feeds started successfully")
+        logger.info("All data feeds started successfully with MEXC as primary crypto source")
     
     async def stop(self):
         """Stop all data feeds"""
