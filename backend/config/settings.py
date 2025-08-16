@@ -22,16 +22,18 @@ class RiskSettings(BaseModel):
     take_profit_multiplier: float = Field(default=3.0, description="Take profit ATR multiplier")
 
 class SystemSettings(BaseModel):
-    """System performance configuration"""
+    """System performance configuration - Optimized for 48-core, 188GB RAM"""
     enable_parallel_processing: bool = Field(default=True)
-    max_concurrent_symbols: int = Field(default=100)
-    memory_cache_size_mb: int = Field(default=8192)
+    max_concurrent_symbols: int = Field(default=200)
+    memory_cache_size_mb: int = Field(default=16384)  # 16GB cache
     data_compression: bool = Field(default=True)
-    parallel_analysis_workers: int = Field(default=12)
-    data_processing_threads: int = Field(default=8)
-    strategy_evaluation_workers: int = Field(default=6)
-    risk_calculation_threads: int = Field(default=4)
-    concurrent_data_feeds: int = Field(default=20)
+    parallel_analysis_workers: int = Field(default=36)  # 75% of 48 cores
+    data_processing_threads: int = Field(default=24)    # 50% of 48 cores
+    strategy_evaluation_workers: int = Field(default=16) # Increased for 99% accuracy
+    risk_calculation_threads: int = Field(default=8)     # Doubled
+    concurrent_data_feeds: int = Field(default=50)       # Increased for multiple exchanges
+    ml_model_workers: int = Field(default=12)             # Dedicated ML workers
+    rl_training_processes: int = Field(default=8)         # Dedicated RL processes
 
 class TradingSystemConfig:
     """Main configuration class for the FinGPT Trading System"""
