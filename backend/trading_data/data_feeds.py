@@ -350,7 +350,8 @@ class DataFeedManager:
             "active_feeds": len(self.active_feeds),
             "subscribed_symbols": len(self.subscribers),
             "status": "running" if self.is_running else "stopped",
-            "data_sources": ["yahoo_finance", "binance"],
+            "data_sources": ["mexc", "yahoo_finance", "binance"],
+            "primary_crypto_source": "mexc",
             "last_update": datetime.now().isoformat()
         }
         
