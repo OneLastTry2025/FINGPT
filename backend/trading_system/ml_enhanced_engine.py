@@ -736,6 +736,9 @@ class MLEnhancedTradingEngine:
         """Get current engine status"""
         total_unrealized_pnl = sum(pos.unrealized_pnl for pos in self.positions.values())
         
+        # Get advanced ML engine status
+        advanced_ml_status = await self.advanced_ml_engine.get_model_status()
+        
         return {
             "is_running": self.is_running,
             "portfolio_value": self.portfolio_value + total_unrealized_pnl,
@@ -745,5 +748,6 @@ class MLEnhancedTradingEngine:
             "win_rate": self.win_rate,
             "total_trades": self.total_trades,
             "active_symbols": list(self.positions.keys()),
-            "ml_models_loaded": len(self.ml_models)
+            "ml_models_loaded": len(self.ml_models),
+            "advanced_ml_status": advanced_ml_status
         }
