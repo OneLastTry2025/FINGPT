@@ -164,6 +164,7 @@ class DataFeedManager:
         except Exception as e:
             logger.error(f"Error processing MEXC ticker: {e}")
     
+    async def _yahoo_finance_feed(self):
         """Yahoo Finance data feed for stocks and forex"""
         stocks = ["AAPL", "GOOGL", "MSFT", "TSLA", "AMZN", "NVDA", "META"]
         forex = ["EURUSD=X", "GBPUSD=X", "USDJPY=X"]
