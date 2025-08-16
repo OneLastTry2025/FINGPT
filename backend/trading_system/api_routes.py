@@ -351,6 +351,32 @@ async def retrain_ml_model(symbol: str, engine=Depends(get_trading_engine)):
         logger.error(f"Error retraining ML model for {symbol}: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to retrain model: {str(e)}")
 
+@router.get("/ml/advanced/status")
+async def get_advanced_ml_status(engine=Depends(get_trading_engine)):
+    """Get comprehensive advanced ML/RL engine status"""
+    try:
+        advanced_status = await engine.advanced_ml_engine.get_model_status()
+        
+        # Add detailed performance metrics
+        detailed_status = {
+            "advanced_ml_engine": advanced_status,
+            "legacy_ml_models": len(engine.ml_models),
+            "total_ml_capacity": {
+                "ensemble_models": advanced_status["ml_models_loaded"],
+                "rl_agents": advanced_status["rl_agents_loaded"],
+                "nlp_available": advanced_status["nlp_available"],
+                "symbols_covered": len(advanced_status["symbols_with_models"])
+            },
+            "performance_summary": advanced_status.get("model_performance", {}),
+            "system_optimization": advanced_status["hardware_utilization"],
+            "status": "success"
+        }
+        
+        return detailed_status
+    except Exception as e:
+        logger.error(f"Error getting advanced ML status: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get advanced ML status: {str(e)}")
+
 # System Health and Monitoring
 @router.get("/health")
 async def get_system_health(engine=Depends(get_trading_engine)):
