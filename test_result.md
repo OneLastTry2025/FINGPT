@@ -146,6 +146,9 @@ backend:
       - working: true
         agent: "main"
         comment: "MAJOR UPDATE: Implemented MEXC WebSocket as primary crypto data source. Real-time data feeds now connect to wss://contract.mexc.com/edge with live ticker subscriptions for BTC_USDT, ETH_USDT, etc. Replaced synthetic data with real MEXC market data. System now gets actual current prices instead of synthetic data."
+      - working: "testing_required"
+        agent: "main"
+        comment: "READY FOR COMPREHENSIVE TESTING: Need to verify real price integration in /api/trading/ml/activity/live endpoint shows realistic current prices (BTC ~$93,000, ETH ~$3,300, BNB ~$710) instead of synthetic data. Test data source tracking (mexc_api, coingecko_api, binance_api, fallback_realistic). Verify system stability and error handling for invalid symbols."
 
   - task: "MongoDB Storage Manager"
     implemented: true
