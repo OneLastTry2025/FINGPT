@@ -20,9 +20,9 @@ import warnings
 warnings.filterwarnings('ignore')
 
 # Trading system imports
-from .storage import MongoDBManager
-from ..trading_data.data_feeds import DataFeedManager, MarketTick
-from ..config.settings import TradingSystemConfig
+from trading_system.storage import MongoDBManager
+from trading_data.data_feeds import DataFeedManager, MarketTick
+from config.settings import TradingSystemConfig
 
 logger = logging.getLogger(__name__)
 
