@@ -155,9 +155,9 @@ class AdvancedMLEngine:
         self.sentiment_analyzer = SentimentIntensityAnalyzer()
         self.nlp_pipeline = None
         
-        # Thread pools for parallel processing
-        self.thread_executor = ThreadPoolExecutor(max_workers=self.cpu_cores)
-        self.process_executor = ProcessPoolExecutor(max_workers=min(8, self.cpu_cores))
+        # Reduced thread pools to prevent API blocking
+        self.thread_executor = ThreadPoolExecutor(max_workers=2)  # Reduced from cpu_cores
+        self.process_executor = ProcessPoolExecutor(max_workers=2)  # Reduced from 8
         
         # Performance tracking
         self.model_performance = {}
