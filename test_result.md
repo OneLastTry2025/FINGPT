@@ -170,6 +170,9 @@ backend:
       - working: true
         agent: "main"
         comment: "Complete REST API with endpoints for trading control, portfolio management, performance metrics, and system configuration. All endpoints tested and functional."
+      - working: true
+        agent: "testing"
+        comment: "TESTED: All trading API routes working perfectly. /api/trading/positions returns empty list (expected for new system), /api/trading/performance/summary shows Portfolio: $100,000.00, Win Rate: 0.0%, Trades: 0. /api/trading/health shows Overall: healthy, Engine: healthy, Data: healthy. Risk management config endpoint operational."
 
   - task: "System Configuration"
     implemented: true
