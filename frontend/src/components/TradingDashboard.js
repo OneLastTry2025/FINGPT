@@ -68,6 +68,20 @@ const TradingDashboard = () => {
       const positionsResponse = await axios.get(`${API}/trading/positions`);
       setPositions(positionsResponse.data);
       
+      // Fetch enhanced ML data
+      try {
+        const mlStatusResponse = await axios.get(`${API}/trading/ml/advanced/status`);
+        setMlStatus(mlStatusResponse.data);
+        
+        const mlActivityResponse = await axios.get(`${API}/trading/ml/activity/live`);
+        setMlActivity(mlActivityResponse.data);
+        
+        const mlPerfResponse = await axios.get(`${API}/trading/ml/performance/detailed`);
+        setMlPerformance(mlPerfResponse.data);
+      } catch (mlError) {
+        console.warn('ML data unavailable:', mlError);
+      }
+      
       setLoading(false);
     } catch (error) {
       console.error('Error fetching data:', error);
