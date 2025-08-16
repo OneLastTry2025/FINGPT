@@ -40,6 +40,13 @@ const TradingDashboard = () => {
   const [positions, setPositions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  
+  // Enhanced ML state
+  const [mlStatus, setMlStatus] = useState(null);
+  const [mlActivity, setMlActivity] = useState(null);
+  const [mlPerformance, setMlPerformance] = useState(null);
+  const [finetuningJobs, setFinetuningJobs] = useState([]);
+  const [activeTab, setActiveTab] = useState('overview');
 
   const fetchData = async () => {
     try {
