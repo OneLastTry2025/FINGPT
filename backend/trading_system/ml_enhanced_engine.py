@@ -19,6 +19,9 @@ import joblib
 import warnings
 warnings.filterwarnings('ignore')
 
+# Advanced ML Engine
+from trading_system.advanced_ml_engine import AdvancedMLEngine
+
 # Trading system imports
 from trading_system.storage import MongoDBManager
 from trading_data.data_feeds import DataFeedManager, MarketTick
