@@ -141,11 +141,11 @@ backend:
     file: "backend/trading_data/data_feeds.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: true
         agent: "main"
-        comment: "Multi-source data feed manager implemented for Yahoo Finance, Binance, and MEXC. Note: Binance geo-restricted but system handles gracefully with Yahoo Finance fallback."
+        comment: "MAJOR UPDATE: Implemented MEXC WebSocket as primary crypto data source. Real-time data feeds now connect to wss://contract.mexc.com/edge with live ticker subscriptions for BTC_USDT, ETH_USDT, etc. Replaced synthetic data with real MEXC market data. System now gets actual current prices instead of synthetic data."
 
   - task: "MongoDB Storage Manager"
     implemented: true
