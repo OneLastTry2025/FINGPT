@@ -134,6 +134,12 @@ class MLEnhancedTradingEngine:
         for symbol in list(self.positions.keys()):
             await self._close_position(symbol, "engine_shutdown")
         
+        # Cleanup advanced ML engine
+        try:
+            await self.advanced_ml_engine.cleanup()
+        except Exception as e:
+            logger.warning(f"Error cleaning up advanced ML engine: {e}")
+        
         logger.info("Trading engine stopped")
     
     async def _on_market_tick(self, tick: MarketTick):
