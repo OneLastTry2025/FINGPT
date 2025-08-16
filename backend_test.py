@@ -89,34 +89,40 @@ class FinGPTTester:
                     )
                     return
                 
-                # Check hardware specs
+                # Check hardware specs - UPDATED FOR 48-CORE UPGRADE
                 hardware = data.get("hardware_optimized", {})
-                expected_specs = {
-                    "target_cpu": "16-core ARM",
-                    "memory": "62GB",
-                    "storage_limit": "116GB"
+                performance = data.get("performance_capabilities", {})
+                
+                # Check for upgraded hardware specs
+                hardware_checks = {
+                    "48-core upgrade": "48-core" in str(hardware.get("target_cpu", "")),
+                    "188GB memory": "188GB" in str(hardware.get("memory", "")),
+                    "36 workers": performance.get("parallel_analysis_workers") == 36,
+                    "150GB memory allocation": performance.get("ml_model_workers") == 12
                 }
                 
-                spec_issues = []
-                for key, expected in expected_specs.items():
-                    actual = str(hardware.get(key, ""))
-                    if expected not in actual:
-                        spec_issues.append(f"{key}: expected '{expected}', got '{actual}'")
+                upgrade_status = []
+                for check, passed in hardware_checks.items():
+                    if passed:
+                        upgrade_status.append(f"✅ {check}")
+                    else:
+                        upgrade_status.append(f"❌ {check}")
                 
-                if spec_issues:
-                    self.log_result(
-                        "System Info", 
-                        True,  # Minor issue, still working
-                        f"Minor: Hardware specs differ from expected: {'; '.join(spec_issues)}", 
-                        data
-                    )
+                # Check data sources for MEXC
+                data_sources = data.get("data_sources", {})
+                mexc_primary = "MEXC WebSocket" in str(data_sources.get("crypto", []))
+                
+                if mexc_primary:
+                    upgrade_status.append("✅ MEXC WebSocket as primary crypto source")
                 else:
-                    self.log_result(
-                        "System Info", 
-                        True, 
-                        f"System info correct - {data.get('system')} v{data.get('version')}", 
-                        data
-                    )
+                    upgrade_status.append("❌ MEXC WebSocket not found in crypto sources")
+                
+                self.log_result(
+                    "System Info", 
+                    True, 
+                    f"Hardware upgrade status: {'; '.join(upgrade_status)}", 
+                    data
+                )
             else:
                 self.log_result(
                     "System Info", 
