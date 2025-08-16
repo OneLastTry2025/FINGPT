@@ -106,6 +106,26 @@ const TradingDashboard = () => {
     }
   };
 
+  const startFineTuning = async (symbol, params = {}) => {
+    try {
+      const response = await axios.post(`${API}/trading/ml/finetune/start/${symbol}`, params);
+      if (response.data.status === 'success') {
+        setFinetuningJobs(prev => [...prev, response.data.finetuning_job]);
+      }
+    } catch (error) {
+      console.error(`Error starting fine-tuning for ${symbol}:`, error);
+    }
+  };
+
+  const initializeML = async () => {
+    try {
+      await axios.post(`${API}/trading/ml/initialize`);
+      fetchData();
+    } catch (error) {
+      console.error('Error initializing ML:', error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
