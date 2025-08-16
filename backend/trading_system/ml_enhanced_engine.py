@@ -137,7 +137,8 @@ class MLEnhancedTradingEngine:
         
         # Cleanup advanced ML engine
         try:
-            await self.advanced_ml_engine.cleanup()
+            if self.advanced_ml_engine:
+                await self.advanced_ml_engine.cleanup()
         except Exception as e:
             logger.warning(f"Error cleaning up advanced ML engine: {e}")
         
