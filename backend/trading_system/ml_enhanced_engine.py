@@ -12,8 +12,8 @@ import numpy as np
 from dataclasses import dataclass, field
 import json
 
-# Advanced ML Engine (primary)
-from trading_system.advanced_ml_engine import AdvancedMLEngine
+# Advanced ML Engine (primary) - Temporarily disabled for testing
+# from trading_system.advanced_ml_engine import AdvancedMLEngine
 
 # Legacy ML imports (fallback only)
 from sklearn.ensemble import RandomForestClassifier
