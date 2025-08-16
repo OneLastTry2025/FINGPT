@@ -168,15 +168,19 @@ class MLEnhancedTradingEngine:
         logger.info("Initializing Advanced ML models...")
         
         try:
-            # Initialize advanced ML models using the new engine
-            symbols = self.config.trading_pairs
-            success = await self.advanced_ml_engine.initialize_advanced_models(symbols)
-            
-            if success:
-                logger.info(f"Advanced ML models initialized successfully for {len(symbols)} symbols")
+            # Initialize advanced ML models using the new engine (disabled for testing)
+            if self.advanced_ml_engine:
+                symbols = self.config.trading_pairs
+                success = await self.advanced_ml_engine.initialize_advanced_models(symbols)
+                
+                if success:
+                    logger.info(f"Advanced ML models initialized successfully for {len(symbols)} symbols")
+                else:
+                    logger.warning("Failed to initialize advanced ML models, falling back to legacy models")
+                    # Fallback to legacy ML initialization if needed
+                    await self._initialize_legacy_ml_models()
             else:
-                logger.warning("Failed to initialize advanced ML models, falling back to legacy models")
-                # Fallback to legacy ML initialization if needed
+                logger.info("Advanced ML engine disabled, using legacy models only")
                 await self._initialize_legacy_ml_models()
             
         except Exception as e:
