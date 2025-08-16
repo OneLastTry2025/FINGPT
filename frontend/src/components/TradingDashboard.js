@@ -570,58 +570,354 @@ const TradingDashboard = () => {
             </div>
           </TabsContent>
 
-          {/* ML Tab */}
+          {/* Enhanced ML Tab */}
           <TabsContent value="ml" className="space-y-6">
+            {/* ML Status Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Ensemble Models</CardTitle>
+                  <Layers className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-blue-600">
+                    {mlStatus?.total_ml_capacity?.ensemble_models || 0}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    RF + XGBoost per symbol
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">RL Agents</CardTitle>
+                  <Bot className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-green-600">
+                    {mlStatus?.total_ml_capacity?.rl_agents || 0}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Reinforcement Learning
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Avg Accuracy</CardTitle>
+                  <Target className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-emerald-600">
+                    {mlPerformance?.overall_system_performance?.average_accuracy ? 
+                      `${(mlPerformance.overall_system_performance.average_accuracy * 100).toFixed(1)}%` : 'N/A'}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    System Performance
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">System Status</CardTitle>
+                  <Activity className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <span className="text-sm font-medium">
+                      {mlActivity?.system_status === 'active' ? 'Active' : 'Inactive'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {mlActivity?.total_active_models || 0} models running
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Live ML Activity */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Brain className="h-5 w-5 mr-2" />
-                  Machine Learning Models
+                  <Zap className="h-5 w-5 mr-2" />
+                  Real-time ML Predictions
                 </CardTitle>
                 <CardDescription>
-                  AI models powering the trading decisions
+                  Live predictions from ensemble models and RL agents
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div className="p-4 border rounded-lg">
-                    <h4 className="font-medium mb-2">Random Forest</h4>
-                    <p className="text-sm text-gray-600 mb-2">Price direction prediction</p>
-                    <Badge variant="default" className="bg-green-500">Active</Badge>
+                {mlActivity?.live_activity ? (
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    {Object.entries(mlActivity.live_activity).map(([symbol, data]) => (
+                      <Card key={symbol} className="border-l-4 border-l-blue-500">
+                        <CardHeader className="pb-2">
+                          <div className="flex items-center justify-between">
+                            <CardTitle className="text-lg">{symbol}</CardTitle>
+                            <Badge variant={data.consensus === 'BUY' ? 'default' : 'destructive'}>
+                              {data.consensus}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            ${data.current_price} ({data.price_change_24h > 0 ? '+' : ''}{data.price_change_24h}%)
+                          </p>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          {/* ML Model Predictions */}
+                          <div>
+                            <h4 className="text-sm font-medium mb-2">Ensemble Models</h4>
+                            {Object.entries(data.ml_predictions || {}).map(([model, pred]) => (
+                              <div key={model} className="flex items-center justify-between text-sm">
+                                <span className="capitalize">{model.replace('_', ' ')}</span>
+                                <div className="flex items-center space-x-2">
+                                  <Badge 
+                                    variant={pred.prediction === 'BUY' ? 'default' : 'destructive'} 
+                                    className="text-xs"
+                                  >
+                                    {pred.prediction}
+                                  </Badge>
+                                  <span className="text-muted-foreground">
+                                    {(pred.confidence * 100).toFixed(0)}%
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          
+                          {/* RL Predictions */}
+                          {data.rl_predictions && (
+                            <div>
+                              <h4 className="text-sm font-medium mb-2">RL Agent</h4>
+                              <div className="flex items-center justify-between text-sm">
+                                <span>Action</span>
+                                <div className="flex items-center space-x-2">
+                                  <Badge 
+                                    variant={
+                                      data.rl_predictions.action === 'BUY' ? 'default' : 
+                                      data.rl_predictions.action === 'SELL' ? 'destructive' : 'secondary'
+                                    }
+                                    className="text-xs"
+                                  >
+                                    {data.rl_predictions.action}
+                                  </Badge>
+                                  <span className="text-muted-foreground">
+                                    {(data.rl_predictions.confidence * 100).toFixed(0)}%
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="text-xs text-muted-foreground mt-1">
+                                Expected Reward: {data.rl_predictions.expected_reward}
+                              </div>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
                   </div>
-                  
-                  <div className="p-4 border rounded-lg">
-                    <h4 className="font-medium mb-2">Technical Analysis</h4>
-                    <p className="text-sm text-gray-600 mb-2">25+ indicators</p>
-                    <Badge variant="default" className="bg-green-500">Active</Badge>
+                ) : (
+                  <div className="text-center py-8">
+                    <Brain className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground">Initialize ML models to view predictions</p>
+                    <Button onClick={initializeML} className="mt-4">
+                      Initialize ML Models
+                    </Button>
                   </div>
-                  
-                  <div className="p-4 border rounded-lg">
-                    <h4 className="font-medium mb-2">Risk Management</h4>
-                    <p className="text-sm text-gray-600 mb-2">Kelly Criterion + ATR</p>
-                    <Badge variant="default" className="bg-green-500">Active</Badge>
-                  </div>
-                </div>
-
-                <div className="mt-6">
-                  <h4 className="font-medium mb-3">Trading Strategies</h4>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between p-3 border rounded">
-                      <span>Momentum Strategy</span>
-                      <Badge variant="default" className="bg-blue-500">Running</Badge>
-                    </div>
-                    <div className="flex items-center justify-between p-3 border rounded">
-                      <span>Mean Reversion Strategy</span>
-                      <Badge variant="default" className="bg-blue-500">Running</Badge>
-                    </div>
-                    <div className="flex items-center justify-between p-3 border rounded">
-                      <span>Breakout Strategy</span>
-                      <Badge variant="default" className="bg-blue-500">Running</Badge>
-                    </div>
-                  </div>
-                </div>
+                )}
               </CardContent>
             </Card>
+
+            {/* Model Performance Analytics */}
+            {mlPerformance && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <BarChart3 className="h-5 w-5 mr-2" />
+                    Performance Analytics
+                  </CardTitle>
+                  <CardDescription>
+                    Detailed metrics for all ML models
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    {Object.entries(mlPerformance.performance_analytics).map(([symbol, data]) => (
+                      <div key={symbol} className="border rounded-lg p-4">
+                        <h3 className="text-lg font-semibold mb-4">{symbol}</h3>
+                        
+                        {/* Ensemble Performance */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                          <div>
+                            <h4 className="text-sm font-medium text-muted-foreground mb-2">ENSEMBLE PERFORMANCE</h4>
+                            <div className="space-y-2">
+                              <div className="flex justify-between">
+                                <span className="text-sm">Combined Accuracy</span>
+                                <span className="text-sm font-medium">
+                                  {(data.ensemble_performance.combined_accuracy * 100).toFixed(2)}%
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-sm">Consensus</span>
+                                <span className="text-sm font-medium">
+                                  {(data.ensemble_performance.prediction_consensus * 100).toFixed(1)}%
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-sm">Stability Score</span>
+                                <span className="text-sm font-medium">
+                                  {(data.ensemble_performance.stability_score * 100).toFixed(1)}%
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* RL Performance */}
+                          {data.rl_performance && (
+                            <div>
+                              <h4 className="text-sm font-medium text-muted-foreground mb-2">RL AGENT PERFORMANCE</h4>
+                              <div className="space-y-2">
+                                <div className="flex justify-between">
+                                  <span className="text-sm">Win Rate</span>
+                                  <span className="text-sm font-medium">
+                                    {(data.rl_performance.win_rate * 100).toFixed(1)}%
+                                  </span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-sm">Avg Reward</span>
+                                  <span className="text-sm font-medium">
+                                    {data.rl_performance.average_reward.toFixed(4)}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-sm">Sharpe Ratio</span>
+                                  <span className="text-sm font-medium">
+                                    {data.rl_performance.sharpe_ratio.toFixed(2)}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Individual Model Performance */}
+                        <div>
+                          <h4 className="text-sm font-medium text-muted-foreground mb-3">INDIVIDUAL MODEL METRICS</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {Object.entries(data.models).map(([modelName, metrics]) => (
+                              <div key={modelName} className="border rounded p-3">
+                                <h5 className="font-medium capitalize mb-2">
+                                  {modelName.replace('_', ' ')}
+                                </h5>
+                                <div className="grid grid-cols-2 gap-2 text-xs">
+                                  <div>Accuracy: {(metrics.accuracy * 100).toFixed(1)}%</div>
+                                  <div>Precision: {(metrics.precision * 100).toFixed(1)}%</div>
+                                  <div>Recall: {(metrics.recall * 100).toFixed(1)}%</div>
+                                  <div>F1 Score: {(metrics.f1_score * 100).toFixed(1)}%</div>
+                                </div>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  className="w-full mt-2"
+                                  onClick={() => startFineTuning(symbol, {
+                                    model: modelName,
+                                    epochs: 10,
+                                    learning_rate: 0.001
+                                  })}
+                                >
+                                  Fine-tune Model
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* System Hardware Utilization */}
+            {mlStatus?.system_optimization && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Cpu className="h-5 w-5 mr-2" />
+                    Hardware Utilization
+                  </CardTitle>
+                  <CardDescription>
+                    ML engine hardware optimization status
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-blue-600">
+                        {mlStatus.system_optimization.cpu_workers}
+                      </div>
+                      <p className="text-sm text-muted-foreground">CPU Workers</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-600">
+                        {mlStatus.system_optimization.memory_limit_gb}GB
+                      </div>
+                      <p className="text-sm text-muted-foreground">Memory Allocated</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-purple-600">
+                        {mlStatus.system_optimization.parallel_processing ? 'ON' : 'OFF'}
+                      </div>
+                      <p className="text-sm text-muted-foreground">Parallel Processing</p>
+                    </div>
+                  </div>
+                  
+                  {mlPerformance?.overall_system_performance && (
+                    <div className="mt-4 pt-4 border-t">
+                      <div className="flex items-center justify-between text-sm">
+                        <span>Prediction Latency</span>
+                        <span className="font-medium">
+                          {mlPerformance.overall_system_performance.prediction_latency_ms}ms
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm mt-2">
+                        <span>System Stability</span>
+                        <span className="font-medium">
+                          {(mlPerformance.overall_system_performance.system_stability * 100).toFixed(1)}%
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Fine-tuning Jobs */}
+            {finetuningJobs.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Settings className="h-5 w-5 mr-2" />
+                    Active Fine-tuning Jobs
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {finetuningJobs.map((job, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 border rounded">
+                        <div>
+                          <div className="font-medium">{job.symbol}</div>
+                          <div className="text-sm text-muted-foreground">{job.status}</div>
+                        </div>
+                        <Badge variant="outline">{job.status}</Badge>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
         </Tabs>
       </div>
