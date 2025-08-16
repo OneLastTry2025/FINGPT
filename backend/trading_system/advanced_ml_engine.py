@@ -595,9 +595,9 @@ class AdvancedMLEngine:
                 device='cpu'  # Use CPU for compatibility
             )
             
-            # Train agent
+            # Train agent with reduced timesteps to prevent blocking
             logger.info(f"Training RL agent for {symbol}...")
-            rl_agent.learn(total_timesteps=10000)
+            rl_agent.learn(total_timesteps=1000)  # Reduced from 10000
             
             # Store trained agent
             self.rl_agents[symbol] = rl_agent
