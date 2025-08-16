@@ -487,8 +487,8 @@ class MLEnhancedTradingEngine:
     async def _get_ml_prediction(self, symbol: str, data: pd.DataFrame) -> float:
         """Get ML model prediction confidence"""
         try:
-            # Try to use advanced ML engine first
-            if hasattr(self.advanced_ml_engine, 'ml_models') and symbol in self.advanced_ml_engine.ml_models:
+            # Try to use advanced ML engine first (disabled for testing)
+            if self.advanced_ml_engine and hasattr(self.advanced_ml_engine, 'ml_models') and symbol in self.advanced_ml_engine.ml_models:
                 # Prepare features for advanced ML engine
                 data_with_indicators = self._calculate_technical_indicators(data.copy())
                 current = data_with_indicators.iloc[-1]
