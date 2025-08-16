@@ -92,11 +92,11 @@ async def get_system_info():
             "daily_limits": "2% daily loss limit"
         },
         "hardware_optimized": {
-            "target_cpu": "16-core ARM Neoverse-N1",
-            "memory": "62GB RAM available",
-            "storage_limit": "116GB high-speed storage",
+            "target_cpu": "48-core ARM Neoverse-N1",
+            "memory": "188GB RAM available",
+            "storage_limit": "500GB+ high-speed storage",
             "architecture": "ARM64 cloud-optimized",
-            "performance_mode": "High-throughput parallel processing"
+            "performance_mode": "Maximum-throughput parallel processing"
         },
         "performance_capabilities": {
             "max_concurrent_symbols": 100,
