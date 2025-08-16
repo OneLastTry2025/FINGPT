@@ -99,13 +99,15 @@ async def get_system_info():
             "performance_mode": "Maximum-throughput parallel processing"
         },
         "performance_capabilities": {
-            "max_concurrent_symbols": 100,
-            "parallel_analysis_workers": 12,
-            "data_processing_threads": 8,
-            "strategy_evaluation_workers": 6,
-            "risk_calculation_threads": 4,
-            "memory_cache_size_mb": 8192,
-            "concurrent_data_feeds": 20
+            "max_concurrent_symbols": 200,
+            "parallel_analysis_workers": 36,
+            "data_processing_threads": 24,
+            "strategy_evaluation_workers": 16,
+            "risk_calculation_threads": 8,
+            "memory_cache_size_mb": 16384,
+            "concurrent_data_feeds": 50,
+            "ml_model_workers": 12,
+            "rl_training_processes": 8
         }
     }
 
