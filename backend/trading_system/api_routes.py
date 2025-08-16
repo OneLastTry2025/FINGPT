@@ -76,7 +76,7 @@ async def get_engine_status(engine=Depends(get_trading_engine)):
 @router.post("/start")
 async def start_trading_engine(
     symbols: List[str] = ["BTCUSDT", "ETHUSDT", "BNBUSDT"],
-    enable_ml: bool = True,
+    enable_ml: bool = False,  # Changed default to False
     strategies: List[str] = ["momentum", "mean_reversion", "breakout"],
     engine=Depends(get_trading_engine)
 ):
@@ -90,6 +90,27 @@ async def start_trading_engine(
     except Exception as e:
         logger.error(f"Error starting engine: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to start engine: {str(e)}")
+
+@router.post("/ml/initialize")
+async def initialize_ml_models(
+    symbols: List[str] = ["BTCUSDT", "ETHUSDT", "BNBUSDT"],
+    engine=Depends(get_trading_engine)
+):
+    """Initialize ML models separately (can be called after engine is running)"""
+    try:
+        if not engine.is_running:
+            return {"message": "Start trading engine first", "status": "error"}
+        
+        # Initialize ML models
+        success = await engine.advanced_ml_engine.initialize_advanced_models(symbols)
+        
+        if success:
+            return {"message": "ML models initialized successfully", "status": "success"}
+        else:
+            return {"message": "Failed to initialize ML models", "status": "error"}
+    except Exception as e:
+        logger.error(f"Error initializing ML models: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to initialize ML models: {str(e)}")
 
 @router.post("/stop")
 async def stop_trading_engine(engine=Depends(get_trading_engine)):
