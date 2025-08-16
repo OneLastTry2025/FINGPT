@@ -588,6 +588,15 @@ class FinGPTTester:
         print(f"Testing against: {BACKEND_URL}")
         print("=" * 60)
         
+        # PRIORITY TESTS (as per review request)
+        print("\n🔥 PRIORITY TESTS - MEXC & Hardware Upgrades")
+        print("-" * 40)
+        self.test_mexc_data_feeds()
+        self.test_real_vs_synthetic_data()
+        self.test_crypto_price_accuracy()
+        
+        print("\n📊 CORE SYSTEM TESTS")
+        print("-" * 40)
         # Run all tests
         self.test_basic_api_response()
         self.test_system_info()
