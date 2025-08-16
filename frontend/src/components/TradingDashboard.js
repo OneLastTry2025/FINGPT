@@ -254,16 +254,19 @@ const TradingDashboard = () => {
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">ML Models</CardTitle>
+                  <CardTitle className="text-sm font-medium">Advanced ML Models</CardTitle>
                   <Brain className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-purple-600">
-                    {engineStatus?.ml_models_loaded || 0}
+                    {mlStatus?.total_ml_capacity?.ensemble_models || engineStatus?.ml_models_loaded || 0}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Active Models
+                    {mlStatus ? `+${mlStatus.total_ml_capacity.rl_agents || 0} RL Agents` : 'Active Models'}
                   </p>
+                  {mlStatus?.total_ml_capacity?.nlp_available && (
+                    <Badge variant="outline" className="mt-1 text-xs">NLP Enabled</Badge>
+                  )}
                 </CardContent>
               </Card>
             </div>
