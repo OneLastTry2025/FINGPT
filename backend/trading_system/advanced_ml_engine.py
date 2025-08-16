@@ -519,42 +519,20 @@ class AdvancedMLEngine:
             
             self.feature_scalers[symbol] = scaler
             
-            # Train multiple models in parallel
+            # Train multiple models in parallel (but limit to prevent blocking)
             models_config = {
                 'random_forest': RandomForestClassifier(
-                    n_estimators=200,
-                    max_depth=10,
+                    n_estimators=50,  # Reduced from 200
+                    max_depth=8,      # Reduced from 10
                     random_state=42,
-                    n_jobs=-1
+                    n_jobs=2          # Reduced from -1
                 ),
                 'xgboost': xgb.XGBClassifier(
-                    n_estimators=200,
-                    max_depth=6,
+                    n_estimators=50,  # Reduced from 200
+                    max_depth=4,      # Reduced from 6
                     learning_rate=0.1,
                     random_state=42,
-                    n_jobs=-1
-                ),
-                'lightgbm': lgb.LGBMClassifier(
-                    n_estimators=200,
-                    max_depth=6,
-                    learning_rate=0.1,
-                    random_state=42,
-                    n_jobs=-1,
-                    verbose=-1
-                ),
-                'catboost': CatBoostClassifier(
-                    iterations=200,
-                    depth=6,
-                    learning_rate=0.1,
-                    random_state=42,
-                    verbose=False
-                ),
-                'neural_network': MLPClassifier(
-                    hidden_layer_sizes=(100, 50, 25),
-                    max_iter=500,
-                    random_state=42,
-                    early_stopping=True,
-                    validation_fraction=0.1
+                    n_jobs=2          # Reduced from -1
                 )
             }
             
