@@ -274,9 +274,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Frontend Dashboard Implementation"
-    - "Real-time Data Visualization"
-    - "Trading Controls Interface"
+    - "Real-time Data Feeds Manager - MEXC Integration Testing"
+    - "Live Price Data Verification"
+    - "ML Activity Endpoint Testing"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
