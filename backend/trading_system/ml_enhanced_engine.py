@@ -475,6 +475,33 @@ class MLEnhancedTradingEngine:
     async def _get_ml_prediction(self, symbol: str, data: pd.DataFrame) -> float:
         """Get ML model prediction confidence"""
         try:
+            # Try to use advanced ML engine first
+            if hasattr(self.advanced_ml_engine, 'ml_models') and symbol in self.advanced_ml_engine.ml_models:
+                # Prepare features for advanced ML engine
+                data_with_indicators = self._calculate_technical_indicators(data.copy())
+                current = data_with_indicators.iloc[-1]
+                
+                feature_columns = [
+                    'rsi', 'macd', 'bb_upper', 'bb_lower', 'sma_20', 'ema_12', 
+                    'atr', 'volume_sma', 'price_change', 'volume_change'
+                ]
+                
+                features = []
+                for col in feature_columns:
+                    if col in current and not pd.isna(current[col]):
+                        features.append(current[col])
+                    else:
+                        features.append(0.0)
+                
+                features_array = np.array(features)
+                
+                # Get prediction from advanced ML engine
+                prediction_result = await self.advanced_ml_engine.get_ml_prediction(symbol, features_array)
+                
+                if prediction_result and prediction_result.get('method') != 'fallback':
+                    return prediction_result.get('confidence', 0.5)
+            
+            # Fallback to legacy ML models
             if symbol not in self.ml_models:
                 return 0.5
             
