@@ -259,13 +259,18 @@ const TradingDashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-purple-600">
-                    {mlStatus?.total_ml_capacity?.ensemble_models || engineStatus?.ml_models_loaded || 0}
+                    {mlStatus?.total_ml_capacity?.ensemble_models || 0}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {mlStatus ? `+${mlStatus.total_ml_capacity.rl_agents || 0} RL Agents` : 'Active Models'}
+                    {mlStatus ? `+${mlStatus.total_ml_capacity.rl_agents || 0} RL Agents` : 'Initializing...'}
                   </p>
                   {mlStatus?.total_ml_capacity?.nlp_available && (
                     <Badge variant="outline" className="mt-1 text-xs">NLP Enabled</Badge>
+                  )}
+                  {(!mlStatus || mlStatus.total_ml_capacity.ensemble_models === 0) && (
+                    <Button onClick={initializeML} size="sm" className="mt-2 w-full">
+                      Initialize ML
+                    </Button>
                   )}
                 </CardContent>
               </Card>
