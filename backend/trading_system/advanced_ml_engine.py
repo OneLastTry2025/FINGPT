@@ -141,9 +141,9 @@ class AdvancedMLEngine:
     def __init__(self, hardware_config: Dict[str, Any]):
         self.hardware_config = hardware_config
         
-        # Utilize full hardware potential - Optimized for 48-core system
-        self.cpu_cores = hardware_config.get('parallel_analysis_workers', 24)
-        self.memory_limit_gb = 100  # Increased for high-performance system
+        # Utilize full hardware potential - Optimized for 48-core, 188GB system
+        self.cpu_cores = hardware_config.get('parallel_analysis_workers', 36)  # Updated for 48-core
+        self.memory_limit_gb = 150  # Increased from 100GB to 150GB for 188GB system
         
         # Initialize model storage
         self.ml_models = {}
@@ -155,9 +155,9 @@ class AdvancedMLEngine:
         self.sentiment_analyzer = SentimentIntensityAnalyzer()
         self.nlp_pipeline = None
         
-        # Optimized thread pools for high-performance system
-        self.thread_executor = ThreadPoolExecutor(max_workers=12)  # Increased for 48-core system
-        self.process_executor = ProcessPoolExecutor(max_workers=16)  # Increased for parallel processing
+        # Optimized thread pools for maximum performance system
+        self.thread_executor = ThreadPoolExecutor(max_workers=24)  # Doubled for 48-core system
+        self.process_executor = ProcessPoolExecutor(max_workers=24)  # Increased for maximum parallel processing
         
         # Performance tracking
         self.model_performance = {}
