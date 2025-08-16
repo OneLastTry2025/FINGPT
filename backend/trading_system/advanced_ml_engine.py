@@ -305,7 +305,7 @@ class AdvancedMLEngine:
         return df
     
     def _add_advanced_technical_indicators(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Add comprehensive technical indicators using TA-Lib"""
+        """Add comprehensive technical indicators using TA-Lib or fallback implementations"""
         try:
             # Price arrays
             open_prices = df['open'].values
@@ -314,41 +314,121 @@ class AdvancedMLEngine:
             close_prices = df['close'].values
             volume = df['volume'].values
             
-            # Trend indicators
-            df['sma_10'] = talib.SMA(close_prices, timeperiod=10)
-            df['sma_20'] = talib.SMA(close_prices, timeperiod=20)
-            df['sma_50'] = talib.SMA(close_prices, timeperiod=50)
-            df['ema_12'] = talib.EMA(close_prices, timeperiod=12)
-            df['ema_26'] = talib.EMA(close_prices, timeperiod=26)
+            if TALIB_AVAILABLE:
+                # Use TA-Lib for optimal performance
+                # Trend indicators
+                df['sma_10'] = talib.SMA(close_prices, timeperiod=10)
+                df['sma_20'] = talib.SMA(close_prices, timeperiod=20)
+                df['sma_50'] = talib.SMA(close_prices, timeperiod=50)
+                df['ema_12'] = talib.EMA(close_prices, timeperiod=12)
+                df['ema_26'] = talib.EMA(close_prices, timeperiod=26)
+                
+                # MACD
+                df['macd'], df['macd_signal'], df['macd_hist'] = talib.MACD(close_prices)
+                
+                # RSI
+                df['rsi'] = talib.RSI(close_prices, timeperiod=14)
+                
+                # Bollinger Bands
+                df['bb_upper'], df['bb_middle'], df['bb_lower'] = talib.BBANDS(close_prices)
+                
+                # Momentum indicators
+                df['momentum'] = talib.MOM(close_prices, timeperiod=10)
+                df['williams_r'] = talib.WILLR(high_prices, low_prices, close_prices)
+                df['cci'] = talib.CCI(high_prices, low_prices, close_prices)
+                
+                # Volume indicators
+                df['ad_line'] = talib.AD(high_prices, low_prices, close_prices, volume)
+                df['obv'] = talib.OBV(close_prices, volume)
+                
+                # Volatility indicators
+                df['atr'] = talib.ATR(high_prices, low_prices, close_prices)
+                df['natr'] = talib.NATR(high_prices, low_prices, close_prices)
+                
+                # Pattern recognition
+                df['doji'] = talib.CDLDOJI(open_prices, high_prices, low_prices, close_prices)
+                df['hammer'] = talib.CDLHAMMER(open_prices, high_prices, low_prices, close_prices)
+                df['engulfing'] = talib.CDLENGULFING(open_prices, high_prices, low_prices, close_prices)
+            else:
+                # Fallback implementations using pandas
+                # Simple Moving Averages
+                df['sma_10'] = df['close'].rolling(window=10).mean()
+                df['sma_20'] = df['close'].rolling(window=20).mean()
+                df['sma_50'] = df['close'].rolling(window=50).mean()
+                
+                # Exponential Moving Averages
+                df['ema_12'] = df['close'].ewm(span=12).mean()
+                df['ema_26'] = df['close'].ewm(span=26).mean()
+                
+                # MACD
+                df['macd'] = df['ema_12'] - df['ema_26']
+                df['macd_signal'] = df['macd'].ewm(span=9).mean()
+                df['macd_hist'] = df['macd'] - df['macd_signal']
+                
+                # RSI
+                delta = df['close'].diff()
+                gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
+                loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
+                rs = gain / loss
+                df['rsi'] = 100 - (100 / (1 + rs))
+                
+                # Bollinger Bands
+                df['bb_middle'] = df['close'].rolling(window=20).mean()
+                bb_std = df['close'].rolling(window=20).std()
+                df['bb_upper'] = df['bb_middle'] + (bb_std * 2)
+                df['bb_lower'] = df['bb_middle'] - (bb_std * 2)
+                
+                # Momentum
+                df['momentum'] = df['close'] - df['close'].shift(10)
+                
+                # Williams %R
+                high_14 = df['high'].rolling(window=14).max()
+                low_14 = df['low'].rolling(window=14).min()
+                df['williams_r'] = -100 * ((high_14 - df['close']) / (high_14 - low_14))
+                
+                # CCI (Commodity Channel Index)
+                tp = (df['high'] + df['low'] + df['close']) / 3
+                sma_tp = tp.rolling(window=20).mean()
+                mad = tp.rolling(window=20).apply(lambda x: np.abs(x - x.mean()).mean())
+                df['cci'] = (tp - sma_tp) / (0.015 * mad)
+                
+                # Accumulation/Distribution Line
+                clv = ((df['close'] - df['low']) - (df['high'] - df['close'])) / (df['high'] - df['low'])
+                clv = clv.fillna(0)
+                df['ad_line'] = (clv * df['volume']).cumsum()
+                
+                # On Balance Volume
+                obv = np.where(df['close'] > df['close'].shift(1), df['volume'],
+                              np.where(df['close'] < df['close'].shift(1), -df['volume'], 0))
+                df['obv'] = pd.Series(obv).cumsum()
+                
+                # Average True Range
+                high_low = df['high'] - df['low']
+                high_close = np.abs(df['high'] - df['close'].shift())
+                low_close = np.abs(df['low'] - df['close'].shift())
+                true_range = np.maximum(high_low, np.maximum(high_close, low_close))
+                df['atr'] = pd.Series(true_range).rolling(window=14).mean()
+                df['natr'] = (df['atr'] / df['close']) * 100
+                
+                # Simple pattern recognition (basic implementations)
+                # Doji: open and close are very close
+                body_size = np.abs(df['close'] - df['open'])
+                range_size = df['high'] - df['low']
+                df['doji'] = np.where((body_size / range_size) < 0.1, 100, 0)
+                
+                # Hammer: small body at top of range with long lower shadow
+                lower_shadow = df['open'].combine(df['close'], min) - df['low']
+                upper_shadow = df['high'] - df['open'].combine(df['close'], max)
+                df['hammer'] = np.where((lower_shadow > 2 * body_size) & (upper_shadow < body_size), 100, 0)
+                
+                # Engulfing: simplified version
+                df['engulfing'] = np.where(
+                    (df['close'] > df['open']) & 
+                    (df['close'].shift(1) < df['open'].shift(1)) &
+                    (df['close'] > df['open'].shift(1)) &
+                    (df['open'] < df['close'].shift(1)), 100, 0)
             
-            # MACD
-            df['macd'], df['macd_signal'], df['macd_hist'] = talib.MACD(close_prices)
-            
-            # RSI
-            df['rsi'] = talib.RSI(close_prices, timeperiod=14)
-            
-            # Bollinger Bands
-            df['bb_upper'], df['bb_middle'], df['bb_lower'] = talib.BBANDS(close_prices)
-            
-            # Momentum indicators
-            df['momentum'] = talib.MOM(close_prices, timeperiod=10)
-            df['williams_r'] = talib.WILLR(high_prices, low_prices, close_prices)
-            df['cci'] = talib.CCI(high_prices, low_prices, close_prices)
-            
-            # Volume indicators
-            df['ad_line'] = talib.AD(high_prices, low_prices, close_prices, volume)
-            df['obv'] = talib.OBV(close_prices, volume)
-            
-            # Volatility indicators
-            df['atr'] = talib.ATR(high_prices, low_prices, close_prices)
-            df['natr'] = talib.NATR(high_prices, low_prices, close_prices)
-            
-            # Pattern recognition
-            df['doji'] = talib.CDLDOJI(open_prices, high_prices, low_prices, close_prices)
-            df['hammer'] = talib.CDLHAMMER(open_prices, high_prices, low_prices, close_prices)
-            df['engulfing'] = talib.CDLENGULFING(open_prices, high_prices, low_prices, close_prices)
-            
-            # Price action features
+            # Price action features (same for both)
             df['price_change'] = df['close'].pct_change()
             df['volume_change'] = df['volume'].pct_change()
             df['high_low_ratio'] = df['high'] / df['low']
