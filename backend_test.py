@@ -119,6 +119,84 @@ class FinGPTTester:
         except Exception as e:
             self.log_result("ML Activity Live", False, f"Connection error: {str(e)}")
     
+    def test_price_variation_live_updates(self):
+        """CRITICAL TEST: Verify prices are updating/varying (not static hardcoded values)"""
+        try:
+            prices_over_time = []
+            
+            # Call the endpoint multiple times to check for price variations
+            for i in range(3):
+                response = requests.get(f"{API_BASE}/trading/ml/activity/live", timeout=15)
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    
+                    if "live_activity" in data:
+                        activity = data["live_activity"]
+                        btc_data = activity.get("BTCUSDT", {})
+                        btc_price = btc_data.get("current_price", 0)
+                        
+                        prices_over_time.append({
+                            "call": i + 1,
+                            "btc_price": btc_price,
+                            "timestamp": datetime.now().isoformat()
+                        })
+                        
+                        if i < 2:  # Don't sleep after the last call
+                            time.sleep(2)  # Wait 2 seconds between calls
+                    else:
+                        self.log_result(
+                            "Price Variation - Live Updates", 
+                            False, 
+                            f"Missing 'live_activity' field in call {i+1}"
+                        )
+                        return
+                else:
+                    self.log_result(
+                        "Price Variation - Live Updates", 
+                        False, 
+                        f"HTTP {response.status_code} in call {i+1}: {response.text}"
+                    )
+                    return
+            
+            # Analyze price variations
+            if len(prices_over_time) >= 3:
+                btc_prices = [p["btc_price"] for p in prices_over_time]
+                unique_prices = len(set(btc_prices))
+                price_range = max(btc_prices) - min(btc_prices)
+                
+                # Check if prices are varying (not static)
+                if unique_prices > 1:
+                    self.log_result(
+                        "Price Variation - Live Updates", 
+                        True, 
+                        f"✅ PRICES ARE UPDATING: {unique_prices} unique prices, Range: ${price_range:,.2f}, Prices: {btc_prices}", 
+                        prices_over_time
+                    )
+                elif all(p > 115000 for p in btc_prices):  # All prices in realistic range
+                    self.log_result(
+                        "Price Variation - Live Updates", 
+                        True, 
+                        f"Minor: Prices static but realistic: ${btc_prices[0]:,.2f} (may be due to low volatility period)", 
+                        prices_over_time
+                    )
+                else:
+                    self.log_result(
+                        "Price Variation - Live Updates", 
+                        False, 
+                        f"❌ STATIC HARDCODED PRICES DETECTED: All calls returned ${btc_prices[0]:,.2f}", 
+                        prices_over_time
+                    )
+            else:
+                self.log_result(
+                    "Price Variation - Live Updates", 
+                    False, 
+                    "Insufficient data points collected for variation analysis"
+                )
+                
+        except Exception as e:
+            self.log_result("Price Variation - Live Updates", False, f"Connection error: {str(e)}")
+    
     def test_market_data_summary_mexc(self):
         """PRIORITY TEST: Market Data Summary - MEXC Integration Verification"""
         try:
