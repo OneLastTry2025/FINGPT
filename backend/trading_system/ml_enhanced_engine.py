@@ -150,6 +150,19 @@ class MLEnhancedTradingEngine:
     async def _on_market_tick(self, tick: MarketTick):
         """Handle incoming market data"""
         try:
+            # Store real-time price data from MEXC
+            self.latest_prices[tick.symbol] = {
+                'price': tick.price,
+                'volume': tick.volume,
+                'bid': tick.bid,
+                'ask': tick.ask,
+                'timestamp': tick.timestamp,
+                'source': tick.source,
+                'change_24h': 0.0  # Would need historical data for this
+            }
+            
+            logger.info(f"Updated real price for {tick.symbol}: ${tick.price} from {tick.source}")
+            
             # Update position values
             if tick.symbol in self.positions:
                 position = self.positions[tick.symbol]
