@@ -632,11 +632,12 @@ class FinGPTTester:
         
         # CRITICAL ENDPOINTS FROM REVIEW REQUEST
         self.test_ml_activity_live_real_prices()
-        self.test_market_data_summary_mexc()
-        self.test_performance_summary()
-        self.test_system_performance()
+        self.test_price_variation_live_updates()  # NEW: Test price variations
         self.test_trading_health()
+        self.test_market_data_summary_mexc()
+        self.test_system_performance()
         self.test_trading_status()
+        self.test_performance_summary()
         self.test_system_info()
         self.test_advanced_ml_status()
         self.test_ml_models_info()
