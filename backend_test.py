@@ -74,18 +74,34 @@ class FinGPTTester:
                     total_models = data.get("total_active_models", 0)
                     system_status = data.get("system_status", "")
                     
-                    if btc_realistic and eth_realistic and bnb_realistic:
+                    # Verify data source is not synthetic (CRITICAL CHECK)
+                    good_data_source = data_source in ["mexc_api", "fallback_realistic"] or "mexc" in data_source.lower()
+                    synthetic_data = "synthetic" in data_source.lower()
+                    
+                    if btc_realistic and eth_realistic and bnb_realistic and good_data_source and not synthetic_data:
                         self.log_result(
                             "ML Activity Live - Real Price Data", 
                             True, 
-                            f"REAL PRICE DATA CONFIRMED: {price_check}, Active Models: {total_models}, Status: {system_status}", 
+                            f"✅ REAL CURRENT PRICES CONFIRMED: {price_check}, Data Source: {data_source} ({data_source_primary}), Active Models: {total_models}, Status: {system_status}", 
                             data
+                        )
+                    elif synthetic_data:
+                        self.log_result(
+                            "ML Activity Live - Real Price Data", 
+                            False, 
+                            f"❌ SYNTHETIC DATA DETECTED: Data Source: {data_source}, Prices: {price_check}"
+                        )
+                    elif not (btc_realistic and eth_realistic and bnb_realistic):
+                        self.log_result(
+                            "ML Activity Live - Real Price Data", 
+                            False, 
+                            f"❌ OUTDATED PRICE DATA: {price_check}, Expected BTC ~$117K, ETH ~$4K+, BNB ~$850+"
                         )
                     else:
                         self.log_result(
                             "ML Activity Live - Real Price Data", 
                             False, 
-                            f"SYNTHETIC DATA DETECTED: {price_check}"
+                            f"❌ UNKNOWN DATA SOURCE: {data_source}, Prices: {price_check}"
                         )
                 else:
                     self.log_result(
