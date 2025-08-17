@@ -66,6 +66,10 @@ class FinGPTTester:
                     
                     price_check = f"BTC: ${btc_price:,.2f} ({'✅' if btc_realistic else '❌'}), ETH: ${eth_price:,.2f} ({'✅' if eth_realistic else '❌'}), BNB: ${bnb_price:,.2f} ({'✅' if bnb_realistic else '❌'})"
                     
+                    # Check data source (CRITICAL: should be mexc_api or fallback_realistic, NOT synthetic)
+                    data_source = data.get("data_source", "unknown")
+                    data_source_primary = data.get("data_source_primary", "unknown")
+                    
                     # Check for ML predictions and activity
                     total_models = data.get("total_active_models", 0)
                     system_status = data.get("system_status", "")
