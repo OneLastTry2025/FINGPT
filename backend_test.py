@@ -67,7 +67,7 @@ class FinGPTTester:
                     price_check = f"BTC: ${btc_price:,.2f} ({'✅' if btc_realistic else '❌'}), ETH: ${eth_price:,.2f} ({'✅' if eth_realistic else '❌'}), BNB: ${bnb_price:,.2f} ({'✅' if bnb_realistic else '❌'})"
                     
                     # Check data source (CRITICAL: should be mexc_api or fallback_realistic, NOT synthetic)
-                    data_source = data.get("data_source", "unknown")
+                    btc_data_source = btc_data.get("data_source", "unknown")
                     data_source_primary = data.get("data_source_primary", "unknown")
                     
                     # Check for ML predictions and activity
@@ -75,21 +75,21 @@ class FinGPTTester:
                     system_status = data.get("system_status", "")
                     
                     # Verify data source is not synthetic (CRITICAL CHECK)
-                    good_data_source = data_source in ["mexc_api", "fallback_realistic"] or "mexc" in data_source.lower()
-                    synthetic_data = "synthetic" in data_source.lower()
+                    good_data_source = btc_data_source in ["mexc_api", "fallback_realistic"] or "mexc" in btc_data_source.lower()
+                    synthetic_data = "synthetic" in btc_data_source.lower()
                     
                     if btc_realistic and eth_realistic and bnb_realistic and good_data_source and not synthetic_data:
                         self.log_result(
                             "ML Activity Live - Real Price Data", 
                             True, 
-                            f"✅ REAL CURRENT PRICES CONFIRMED: {price_check}, Data Source: {data_source} ({data_source_primary}), Active Models: {total_models}, Status: {system_status}", 
+                            f"✅ REAL CURRENT PRICES CONFIRMED: {price_check}, Data Source: {btc_data_source} ({data_source_primary}), Active Models: {total_models}, Status: {system_status}", 
                             data
                         )
                     elif synthetic_data:
                         self.log_result(
                             "ML Activity Live - Real Price Data", 
                             False, 
-                            f"❌ SYNTHETIC DATA DETECTED: Data Source: {data_source}, Prices: {price_check}"
+                            f"❌ SYNTHETIC DATA DETECTED: Data Source: {btc_data_source}, Prices: {price_check}"
                         )
                     elif not (btc_realistic and eth_realistic and bnb_realistic):
                         self.log_result(
@@ -101,7 +101,7 @@ class FinGPTTester:
                         self.log_result(
                             "ML Activity Live - Real Price Data", 
                             False, 
-                            f"❌ UNKNOWN DATA SOURCE: {data_source}, Prices: {price_check}"
+                            f"❌ UNKNOWN DATA SOURCE: {btc_data_source}, Prices: {price_check}"
                         )
                 else:
                     self.log_result(
