@@ -83,7 +83,7 @@ class DataFeedManager:
     
     async def _mexc_websocket_feed(self):
         """MEXC WebSocket feed for real-time crypto data (Primary Source)"""
-        mexc_symbols = ["BTC_USDT", "ETH_USDT", "BNB_USDT", "ADA_USDT", "DOT_USDT", "LINK_USDT"]
+        mexc_symbols = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "ADAUSDT", "DOTUSDT", "LINKUSDT"]
         uri = "wss://contract.mexc.com/edge"
         
         while self.is_running:
@@ -91,11 +91,14 @@ class DataFeedManager:
                 async with websockets.connect(uri) as websocket:
                     logger.info("Connected to MEXC WebSocket")
                     
-                    # Subscribe to all trading pairs
+                    # Subscribe to all trading pairs with CORRECT format
                     for symbol in mexc_symbols:
                         subscribe_msg = {
-                            "method": "sub.ticker",
-                            "param": {"symbol": symbol}
+                            "method": "SUBSCRIBE",
+                            "params": {
+                                "channel": "ticker",
+                                "symbol": symbol
+                            }
                         }
                         await websocket.send(json.dumps(subscribe_msg))
                         logger.info(f"Subscribed to MEXC ticker: {symbol}")
