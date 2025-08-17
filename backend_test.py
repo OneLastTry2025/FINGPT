@@ -59,10 +59,10 @@ class FinGPTTester:
                     eth_price = eth_data.get("current_price", 0)
                     bnb_price = bnb_data.get("current_price", 0)
                     
-                    # Check if prices are in realistic ranges (not synthetic)
-                    btc_realistic = 80000 <= btc_price <= 110000  # Current BTC range ~$93K
-                    eth_realistic = 2800 <= eth_price <= 4000     # Current ETH range ~$3.3K
-                    bnb_realistic = 600 <= bnb_price <= 800       # Current BNB range ~$710
+                    # Check if prices are in realistic ranges (USER CONFIRMED: BTC ~$117K)
+                    btc_realistic = 115000 <= btc_price <= 120000  # Current BTC range ~$117K (USER CONFIRMED)
+                    eth_realistic = 4000 <= eth_price <= 5000      # Current ETH range ~$4K+
+                    bnb_realistic = 850 <= bnb_price <= 950       # Current BNB range ~$850+
                     
                     price_check = f"BTC: ${btc_price:,.2f} ({'✅' if btc_realistic else '❌'}), ETH: ${eth_price:,.2f} ({'✅' if eth_realistic else '❌'}), BNB: ${bnb_price:,.2f} ({'✅' if bnb_realistic else '❌'})"
                     
